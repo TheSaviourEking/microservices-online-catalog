@@ -1,0 +1,22 @@
+# Base 
+FROM node:12-alpine AS base 
+EXPOSE 8083 
+ENV NODE_ENV=production 
+WORKDIR /app 
+COPY package*.json ./ 
+RUN npm ci && npm cache clean --force 
+ENV PATH=/app/node_modules/.bin:$PATH
+
+# Development 
+FROM base AS dev 
+ENV NODE_ENV=development 
+WORKDIR /app 
+RUN npm install --only=dev
+# RUN npm install --dev
+CMD ["nodemon", "./bin/www"] 
+
+# Production 
+FROM base AS prod 
+WORKDIR /app 
+COPY . . 
+CMD ["node", "./bin/www"]
